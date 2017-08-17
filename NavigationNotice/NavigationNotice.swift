@@ -179,7 +179,7 @@ open class NavigationNotice {
                 case .bottom:
                     noticeView.contentInset.bottom = contentHeight
                     view.frame.origin.y = contentHeight
-                    noticeView.frame.origin = CGPoint(x: 0, y: self.view.bounds.height - noticeView.bounds.height)
+                    noticeView.frame.origin = CGPoint(x: 0, y: self.view.bounds.height - contentHeight)
                 }
             }
             
@@ -233,7 +233,7 @@ open class NavigationNotice {
         }
         
         func panGestureAction(_ gesture: UIPanGestureRecognizer) {
-            if contentOffsetY >= 0 {
+            if (position == .top && contentOffsetY >= 0) || position == .bottom && contentOffsetY < 0 {
                 hide(false)
                 return
             }
@@ -241,20 +241,32 @@ open class NavigationNotice {
             let locationOffsetY = gesture.location(in: view).y
             
             if gesture.state == .changed {
-                if contentHeight > locationOffsetY {
-                    contentOffsetY = -locationOffsetY
-                } else {
-                    contentOffsetY = -contentHeight
+                switch position {
+                case .top:
+                    contentOffsetY = contentHeight > locationOffsetY ? -locationOffsetY : -contentHeight
+                case .bottom:
+                    contentOffsetY = view.bounds.height - contentHeight < locationOffsetY ? view.bounds.height - locationOffsetY : contentHeight
                 }
             } else if gesture.state == .cancelled || gesture.state == .ended {
-                if contentHeight < locationOffsetY {
-                    contentOffsetY = -contentHeight
+                let isHideIfNeeded: Bool
+                let shouldShow: Bool
+                switch position {
+                case .top:
+                    isHideIfNeeded = contentHeight < locationOffsetY
+                    shouldShow = gesture.velocity(in: view).y > 0
+                case .bottom:
+                    isHideIfNeeded = view.bounds.height - contentHeight > locationOffsetY
+                    shouldShow = gesture.velocity(in: view).y < 0
+                }
+                
+                if isHideIfNeeded {
+                    contentOffsetY = position == .top ? -contentHeight : contentHeight
                     
                     hideIfNeeded(true)
                     return
                 }
                 
-                if gesture.velocity(in: view).y > 0 {
+                if shouldShow {
                     show() {
                         self.hideIfNeeded(true)
                     }
@@ -265,10 +277,11 @@ open class NavigationNotice {
         }
         
         func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-            if contentOffsetY >= 0 {
-                hide(false)
-            } else {
+            let needsHideAnimation = (position == .top && contentOffsetY < 0) || (position == .bottom && contentOffsetY >= 0)
+            if needsHideAnimation {
                 hideIfNeeded(true)
+            } else {
+                hide(false)
             }
         }
         
