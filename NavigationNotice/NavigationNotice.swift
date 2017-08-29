@@ -498,7 +498,6 @@ open class NavigationNotice {
         return self
     }
     
-    @discardableResult
     open func completion(_ completion: (() -> Void)?) {
         completionHandler = completion
     }
