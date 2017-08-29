@@ -115,6 +115,11 @@ open class NavigationNotice {
             view.addSubview(noticeView)
         }
         
+        override func viewDidLayoutSubviews() {
+            super.viewDidLayoutSubviews()
+            noticeView.contentSize.width = view.bounds.width
+        }
+        
         func setInterval(_ interval: TimeInterval) {
             hiddenTimeInterval = interval
             
@@ -493,7 +498,6 @@ open class NavigationNotice {
         return self
     }
     
-    @discardableResult
     open func completion(_ completion: (() -> Void)?) {
         completionHandler = completion
     }
