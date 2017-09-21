@@ -51,6 +51,12 @@ open class NavigationNotice {
         fileprivate var contentView: UIView?
         fileprivate var autoHidden: Bool = false
         fileprivate var hiddenTimeInterval: TimeInterval = 0
+        /// interval until hiding set by `setInterval(_:)`
+        private var _hiddenTimeInterval: TimeInterval = 0 {
+            didSet {
+                hiddenTimeInterval = _hiddenTimeInterval
+            }
+        }
         fileprivate var contentHeight: CGFloat {
             return noticeView.bounds.height
         }
@@ -121,7 +127,7 @@ open class NavigationNotice {
         }
         
         func setInterval(_ interval: TimeInterval) {
-            hiddenTimeInterval = interval
+            _hiddenTimeInterval = interval
             
             if interval >= 0 {
                 autoHidden = true
@@ -266,7 +272,6 @@ open class NavigationNotice {
                 
                 if isHideIfNeeded {
                     contentOffsetY = position == .top ? -contentHeight : contentHeight
-                    
                     hideIfNeeded(true)
                     return
                 }
@@ -284,9 +289,15 @@ open class NavigationNotice {
         func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
             let needsHideAnimation = (position == .top && contentOffsetY < 0) || (position == .bottom && contentOffsetY >= contentHeight)
             if needsHideAnimation {
-                hideIfNeeded(true)
+                resetTimerIfNeeded()
             } else {
                 hide(false)
+            }
+        }
+        
+        func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+            if autoHidden == true && decelerate == false && hiddenTimeInterval == 0 {
+                timer(_hiddenTimeInterval)
             }
         }
         
@@ -307,6 +318,12 @@ open class NavigationNotice {
                 hide(animations, completion)
             } else {
                 UIView.animate(withDuration: 0.25, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .beginFromCurrentState, animations: animations, completion: completion)
+            }
+        }
+        
+        private func resetTimerIfNeeded() {
+            if autoHidden == true {
+                timer(_hiddenTimeInterval)
             }
         }
     }
