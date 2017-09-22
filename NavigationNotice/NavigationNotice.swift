@@ -146,7 +146,6 @@ open class NavigationNotice {
         func timer(_ interval: TimeInterval) {
             let handler: (CFRunLoopTimer?) -> Void = { [weak self] timer in
                 self?.hiddenTimer = nil
-                self?.hiddenTimeInterval = 0
                 
                 if self?.autoHidden == true {
                     if self?.panGesture.state != .changed && self?.scrollPanGesture?.state != .some(.changed) {
@@ -213,7 +212,7 @@ open class NavigationNotice {
         
         func hide(_ animated: Bool) {
             targetView?.removeGestureRecognizer(panGesture)
-            hiddenTimeInterval = 0
+            hiddenTimer = nil
             autoHidden = false
             
             if animated == true {
@@ -232,7 +231,7 @@ open class NavigationNotice {
         }
         
         func hideIfNeeded(_ animated: Bool) {
-            if autoHidden == true && hiddenTimeInterval <= 0 {
+            if autoHidden == true && hiddenTimer == nil {
                 hide(animated)
             }
         }
@@ -266,7 +265,6 @@ open class NavigationNotice {
                 
                 if isHideIfNeeded {
                     contentOffsetY = position == .top ? -contentHeight : contentHeight
-                    
                     hideIfNeeded(true)
                     return
                 }
@@ -282,11 +280,17 @@ open class NavigationNotice {
         }
         
         func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-            let needsHideAnimation = (position == .top && contentOffsetY < 0) || (position == .bottom && contentOffsetY >= 0)
+            let needsHideAnimation = (position == .top && contentOffsetY < 0) || (position == .bottom && contentOffsetY >= contentHeight)
             if needsHideAnimation {
-                hideIfNeeded(true)
+                resetTimerIfNeeded()
             } else {
                 hide(false)
+            }
+        }
+        
+        func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+            if autoHidden == true && decelerate == false && hiddenTimer == nil {
+                timer(hiddenTimeInterval)
             }
         }
         
@@ -307,6 +311,12 @@ open class NavigationNotice {
                 hide(animations, completion)
             } else {
                 UIView.animate(withDuration: 0.25, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .beginFromCurrentState, animations: animations, completion: completion)
+            }
+        }
+        
+        private func resetTimerIfNeeded() {
+            if autoHidden == true {
+                timer(hiddenTimeInterval)
             }
         }
     }
