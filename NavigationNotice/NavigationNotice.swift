@@ -51,12 +51,6 @@ open class NavigationNotice {
         fileprivate var contentView: UIView?
         fileprivate var autoHidden: Bool = false
         fileprivate var hiddenTimeInterval: TimeInterval = 0
-        /// interval until hiding set by `setInterval(_:)`
-        private var _hiddenTimeInterval: TimeInterval = 0 {
-            didSet {
-                hiddenTimeInterval = _hiddenTimeInterval
-            }
-        }
         fileprivate var contentHeight: CGFloat {
             return noticeView.bounds.height
         }
@@ -127,7 +121,7 @@ open class NavigationNotice {
         }
         
         func setInterval(_ interval: TimeInterval) {
-            _hiddenTimeInterval = interval
+            hiddenTimeInterval = interval
             
             if interval >= 0 {
                 autoHidden = true
@@ -152,7 +146,6 @@ open class NavigationNotice {
         func timer(_ interval: TimeInterval) {
             let handler: (CFRunLoopTimer?) -> Void = { [weak self] timer in
                 self?.hiddenTimer = nil
-                self?.hiddenTimeInterval = 0
                 
                 if self?.autoHidden == true {
                     if self?.panGesture.state != .changed && self?.scrollPanGesture?.state != .some(.changed) {
@@ -219,7 +212,7 @@ open class NavigationNotice {
         
         func hide(_ animated: Bool) {
             targetView?.removeGestureRecognizer(panGesture)
-            hiddenTimeInterval = 0
+            hiddenTimer = nil
             autoHidden = false
             
             if animated == true {
@@ -238,7 +231,7 @@ open class NavigationNotice {
         }
         
         func hideIfNeeded(_ animated: Bool) {
-            if autoHidden == true && hiddenTimeInterval <= 0 {
+            if autoHidden == true && hiddenTimer == nil {
                 hide(animated)
             }
         }
@@ -296,8 +289,8 @@ open class NavigationNotice {
         }
         
         func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-            if autoHidden == true && decelerate == false && hiddenTimeInterval == 0 {
-                timer(_hiddenTimeInterval)
+            if autoHidden == true && decelerate == false && hiddenTimer == nil {
+                timer(hiddenTimeInterval)
             }
         }
         
@@ -323,7 +316,7 @@ open class NavigationNotice {
         
         private func resetTimerIfNeeded() {
             if autoHidden == true {
-                timer(_hiddenTimeInterval)
+                timer(hiddenTimeInterval)
             }
         }
     }
