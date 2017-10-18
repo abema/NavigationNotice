@@ -403,6 +403,9 @@ open class NavigationNotice {
     fileprivate var noticeViewController = ViewController()
     fileprivate var onStatusBar: Bool = NavigationNotice.defaultOnStatusBar
     fileprivate var completionHandler: (() -> Void)?
+    open var existCompletionHandler: Bool {
+        return completionHandler != nil
+    }
     /// Common navigation bar on the status bar. Default is `true`.
     open class var defaultOnStatusBar: Bool {
         set { sharedManager.onStatusBar = newValue }
