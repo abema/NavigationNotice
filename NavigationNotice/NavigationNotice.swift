@@ -83,6 +83,7 @@ open class NavigationNotice {
                 return .zero
             }
         }
+        fileprivate var onStatusBar: Bool = true
         
         var showAnimations: ((@escaping () -> Void, @escaping (Bool) -> Void) -> Void)?
         var hideAnimations: ((@escaping () -> Void, @escaping (Bool) -> Void) -> Void)?
@@ -218,7 +219,7 @@ open class NavigationNotice {
                 case .bottom:
                     self.contentOffsetY = self.contentHeight
                 }
-                self.setNeedsStatusBarAppearanceUpdate()
+                self.setNeedsStatusBarAppearanceUpdateIfNeeded()
                 }) { _ in
                     completion()
             }
@@ -232,13 +233,13 @@ open class NavigationNotice {
             if animated == true {
                 hideContent({
                     self.contentOffsetY = 0
-                    self.setNeedsStatusBarAppearanceUpdate()
+                    self.setNeedsStatusBarAppearanceUpdateIfNeeded()
                     }) { _ in
                         self.removeContent()
                         self.hideCompletionHandler?()
                 }
             } else {
-                self.setNeedsStatusBarAppearanceUpdate()
+                self.setNeedsStatusBarAppearanceUpdateIfNeeded()
                 removeContent()
                 hideCompletionHandler?()
             }
@@ -327,6 +328,12 @@ open class NavigationNotice {
             }
         }
         
+        fileprivate func setNeedsStatusBarAppearanceUpdateIfNeeded() {
+            if onStatusBar == true {
+                setNeedsStatusBarAppearanceUpdate()
+            }
+        }
+        
         private func resetTimerIfNeeded() {
             if autoHidden == true {
                 timer(hiddenTimeInterval)
@@ -396,7 +403,7 @@ open class NavigationNotice {
         }
         
         fileprivate func endNotice() {
-            showingNotice?.noticeViewController.setNeedsStatusBarAppearanceUpdate()
+            showingNotice?.noticeViewController.setNeedsStatusBarAppearanceUpdateIfNeeded()
             showingNotice = nil
             
             mainWindow?.makeKeyAndVisible()
@@ -442,7 +449,9 @@ open class NavigationNotice {
     }
     
     fileprivate var noticeViewController = ViewController()
-    fileprivate var onStatusBar: Bool = NavigationNotice.defaultOnStatusBar
+    fileprivate var onStatusBar: Bool = NavigationNotice.defaultOnStatusBar {
+        didSet { noticeViewController.onStatusBar = onStatusBar }
+    }
     fileprivate var completionHandler: (() -> Void)?
     /// Common navigation bar on the status bar. Default is `true`.
     open class var defaultOnStatusBar: Bool {
