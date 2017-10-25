@@ -8,9 +8,15 @@
 
 import UIKit
 
+protocol SafeAreaInsetsEventCapture {
+    var didChangeSafeAreaInsets: ((UIEdgeInsets) -> Void)? { get }
+}
+
 open class NavigationNotice {
     class ViewController: UIViewController, UIScrollViewDelegate, UIGestureRecognizerDelegate {
-        class HitView: UIView {
+        class HitView: UIView, SafeAreaInsetsEventCapture {
+            var didChangeSafeAreaInsets: ((UIEdgeInsets) -> Void)?
+            
             override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
                 if let superView = super.hitTest(point, with: event) {
                     if superView != self {
@@ -18,6 +24,12 @@ open class NavigationNotice {
                     }
                 }
                 return nil
+            }
+            
+            @available(iOS 11, *)
+            override func safeAreaInsetsDidChange() {
+                super.safeAreaInsetsDidChange()
+                didChangeSafeAreaInsets?(safeAreaInsets)
             }
         }
         
@@ -63,6 +75,15 @@ open class NavigationNotice {
                 oldValue?.invalidate()
             }
         }
+        fileprivate var isShowSafeArea: Bool = true
+        private var safeAreaInsets: UIEdgeInsets {
+            if #available(iOS 11, *), isShowSafeArea {
+                return view.safeAreaInsets
+            } else {
+                return .zero
+            }
+        }
+        fileprivate var onStatusBar: Bool = true
         
         var showAnimations: ((@escaping () -> Void, @escaping (Bool) -> Void) -> Void)?
         var hideAnimations: ((@escaping () -> Void, @escaping (Bool) -> Void) -> Void)?
@@ -93,7 +114,14 @@ open class NavigationNotice {
         
         override func loadView() {
             super.loadView()
-            view = HitView(frame: view.bounds)
+            let hitView = HitView(frame: view.bounds)
+            view = hitView
+            hitView.didChangeSafeAreaInsets = { [weak self] safeAreaInsets in
+                guard let me = self else { return }
+                let insets: UIEdgeInsets = me.isShowSafeArea ? safeAreaInsets : .zero
+                let needsUpdateOffset = me.isShowSafeArea ? me.contentView?.superview != nil : false
+                me.layoutNoticeViewsIfNeeded(with: insets, needsUpdateOffset: needsUpdateOffset)
+            }
         }
         
         override func viewDidLoad() {
@@ -167,24 +195,11 @@ open class NavigationNotice {
         func showOn(_ view: UIView) {
             targetView = view
             
-            if let view = contentView {
-                noticeView.frame.size.height = view.frame.height
-                view.frame.size.width = noticeView.bounds.width
-                view.autoresizingMask = .flexibleWidth
-                noticeView.addSubview(view)
-                view.setNeedsDisplay()
-                
-                noticeView.contentSize = noticeView.bounds.size
-                switch position {
-                case .top:
-                    noticeView.contentInset.top = contentHeight
-                    noticeView.frame.origin = .zero
-                    view.frame.origin.y = -contentHeight
-                case .bottom:
-                    noticeView.contentInset.bottom = contentHeight
-                    view.frame.origin.y = contentHeight
-                    noticeView.frame.origin = CGPoint(x: 0, y: self.view.bounds.height - contentHeight)
-                }
+            if let contentView = contentView {
+                contentView.autoresizingMask = .flexibleWidth
+                noticeView.addSubview(contentView)
+                contentView.setNeedsDisplay()
+                layoutNoticeViewsIfNeeded(with: safeAreaInsets, needsUpdateOffset: false)
             }
             
             show() {
@@ -204,7 +219,7 @@ open class NavigationNotice {
                 case .bottom:
                     self.contentOffsetY = self.contentHeight
                 }
-                self.setNeedsStatusBarAppearanceUpdate()
+                self.setNeedsStatusBarAppearanceUpdateIfNeeded()
                 }) { _ in
                     completion()
             }
@@ -218,13 +233,13 @@ open class NavigationNotice {
             if animated == true {
                 hideContent({
                     self.contentOffsetY = 0
-                    self.setNeedsStatusBarAppearanceUpdate()
+                    self.setNeedsStatusBarAppearanceUpdateIfNeeded()
                     }) { _ in
                         self.removeContent()
                         self.hideCompletionHandler?()
                 }
             } else {
-                self.setNeedsStatusBarAppearanceUpdate()
+                self.setNeedsStatusBarAppearanceUpdateIfNeeded()
                 removeContent()
                 hideCompletionHandler?()
             }
@@ -252,8 +267,7 @@ open class NavigationNotice {
                     contentOffsetY = view.bounds.height - contentHeight < locationOffsetY ? view.bounds.height - locationOffsetY : contentHeight
                 }
             } else if gesture.state == .cancelled || gesture.state == .ended {
-                let isHideIfNeeded: Bool
-                let shouldShow: Bool
+                let isHideIfNeeded, shouldShow: Bool
                 switch position {
                 case .top:
                     isHideIfNeeded = contentHeight < locationOffsetY
@@ -314,9 +328,43 @@ open class NavigationNotice {
             }
         }
         
+        fileprivate func setNeedsStatusBarAppearanceUpdateIfNeeded() {
+            if onStatusBar == true {
+                setNeedsStatusBarAppearanceUpdate()
+            }
+        }
+        
         private func resetTimerIfNeeded() {
             if autoHidden == true {
                 timer(hiddenTimeInterval)
+            }
+        }
+        
+        private func layoutNoticeViewsIfNeeded(with safeAreaInsets: UIEdgeInsets, needsUpdateOffset: Bool) {
+            if let contentView = contentView {
+                noticeView.frame.size.height = contentView.bounds.height
+                contentView.frame.size.width = noticeView.bounds.width - safeAreaInsets.right - safeAreaInsets.left
+                
+                noticeView.contentSize = noticeView.bounds.size
+                switch position {
+                case .top:
+                    noticeView.frame.size.height += safeAreaInsets.top
+                    noticeView.contentInset.top = contentHeight
+                    noticeView.contentInset.bottom = safeAreaInsets.top
+                    noticeView.frame.origin = .zero
+                    contentView.frame.origin = CGPoint(x: (safeAreaInsets.right + safeAreaInsets.left) / 2,
+                                                       y: -contentHeight + safeAreaInsets.top)
+                case .bottom:
+                    noticeView.frame.size.height += safeAreaInsets.bottom
+                    noticeView.contentInset.bottom = contentHeight + safeAreaInsets.bottom
+                    noticeView.frame.origin = CGPoint(x: 0, y: self.view.bounds.height - contentHeight)
+                    contentView.frame.origin = CGPoint(x: (safeAreaInsets.right + safeAreaInsets.left) / 2,
+                                                       y: contentHeight)
+                }
+                
+                if needsUpdateOffset {
+                    contentOffsetY = position == .top ? -contentHeight : contentHeight
+                }
             }
         }
     }
@@ -355,7 +403,7 @@ open class NavigationNotice {
         }
         
         fileprivate func endNotice() {
-            showingNotice?.noticeViewController.setNeedsStatusBarAppearanceUpdate()
+            showingNotice?.noticeViewController.setNeedsStatusBarAppearanceUpdateIfNeeded()
             showingNotice = nil
             
             mainWindow?.makeKeyAndVisible()
@@ -401,7 +449,9 @@ open class NavigationNotice {
     }
     
     fileprivate var noticeViewController = ViewController()
-    fileprivate var onStatusBar: Bool = NavigationNotice.defaultOnStatusBar
+    fileprivate var onStatusBar: Bool = NavigationNotice.defaultOnStatusBar {
+        didSet { noticeViewController.onStatusBar = onStatusBar }
+    }
     fileprivate var completionHandler: (() -> Void)?
     open var existCompletionHandler: Bool {
         return completionHandler != nil
@@ -452,6 +502,13 @@ open class NavigationNotice {
     open class func position(_ position: NoticePosition) -> NavigationNotice {
         let notice = NavigationNotice()
         notice.noticeViewController.position = position
+        return notice
+    }
+    
+    @discardableResult
+    open class func isShowSafeArea(_ isShow: Bool) -> NavigationNotice {
+        let notice = NavigationNotice()
+        notice.noticeViewController.isShowSafeArea = isShow
         return notice
     }
     
@@ -531,6 +588,12 @@ open class NavigationNotice {
     @discardableResult
     open func position(_ position: NoticePosition) -> Self {
         noticeViewController.position = position
+        return self
+    }
+    
+    @discardableResult
+    open func isShowSafeArea(_ isShow: Bool) -> Self {
+        noticeViewController.isShowSafeArea = isShow
         return self
     }
 }
