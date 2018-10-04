@@ -104,11 +104,11 @@ open class NavigationNotice {
                 ?? super.preferredInterfaceOrientationForPresentation
         }
         
-        override var childViewControllerForStatusBarStyle : UIViewController? {
+        override var childForStatusBarStyle : UIViewController? {
             return childController
         }
         
-        override var childViewControllerForStatusBarHidden : UIViewController? {
+        override var childForStatusBarHidden : UIViewController? {
             return childController
         }
         
@@ -251,7 +251,7 @@ open class NavigationNotice {
             }
         }
         
-        func panGestureAction(_ gesture: UIPanGestureRecognizer) {
+        @objc func panGestureAction(_ gesture: UIPanGestureRecognizer) {
             if (position == .top && contentOffsetY >= 0) || position == .bottom && contentOffsetY < 0 {
                 hide(false)
                 return
@@ -393,7 +393,7 @@ open class NavigationNotice {
             showingNotice = notice
             
             noticeWindow?.rootViewController = notice.noticeViewController
-            noticeWindow?.windowLevel = UIWindowLevelStatusBar + (notice.onStatusBar ? 1 : -1)
+            noticeWindow?.windowLevel = UIWindow.Level.statusBar + (notice.onStatusBar ? 1 : -1)
             
             if let view = notice.noticeViewController.targetView {
                 mainWindow = view.window
