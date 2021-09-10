@@ -372,12 +372,12 @@ open class NavigationNotice {
     fileprivate class NoticeManager {
         class HitWindow: UIWindow {
             override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
-                if let superWindow = super.hitTest(point, with: event) {
-                    if superWindow != self {
-                        return superWindow
-                    }
+                guard let superview = super.hitTest(point, with: event) else {
+                    return nil
                 }
-                return nil
+
+                let superWindow = (superview as? UIWindow) ?? superview.window
+                return (superWindow != self) ? superWindow : nil
             }
         }
         
