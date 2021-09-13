@@ -376,20 +376,11 @@ open class NavigationNotice {
                     return nil
                 }
 
-                let targetView: UIView? = {
-                    if let superWindow = superview as? UIWindow {
-                        return superWindow
-
-                    // SeeAlso: https://github.com/abema/NavigationNotice/pull/10
-                    } else if let superview = superview.superview, NSStringFromClass(type(of: superview)) == "UIDropShadowView" {
-                        return superview.window
-
-                    } else {
-                        return superview
-                    }
-                }()
-
-                return (targetView != self) ? targetView : nil
+                if let viewController = rootViewController as? NavigationNotice.ViewController, viewController.noticeView.frame.contains(point) {
+                    return superview
+                } else {
+                    return nil
+                }
             }
         }
         
