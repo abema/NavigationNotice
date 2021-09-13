@@ -376,8 +376,17 @@ open class NavigationNotice {
                     return nil
                 }
 
-                let superWindow = (superview as? UIWindow) ?? superview.window
-                return (superWindow != self) ? superWindow : nil
+                let targetView: UIView? = {
+                    if let superWindow = superview as? UIWindow {
+                        return superWindow
+                    } else if let superview = superview.superview, NSStringFromClass(type(of: superview)) == "UIDropShadowView" {
+                        return superview.window
+                    } else {
+                        return superview
+                    }
+                }()
+
+                return (targetView != self) ? targetView : nil
             }
         }
         
