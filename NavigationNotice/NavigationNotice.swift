@@ -379,8 +379,11 @@ open class NavigationNotice {
                 let targetView: UIView? = {
                     if let superWindow = superview as? UIWindow {
                         return superWindow
+
+                    // SeeAlso: https://github.com/abema/NavigationNotice/pull/10
                     } else if let superview = superview.superview, NSStringFromClass(type(of: superview)) == "UIDropShadowView" {
                         return superview.window
+
                     } else {
                         return superview
                     }
