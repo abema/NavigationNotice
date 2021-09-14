@@ -376,8 +376,11 @@ open class NavigationNotice {
                     return nil
                 }
 
-                let superWindow = (superview as? UIWindow) ?? superview.window
-                return (superWindow != self) ? superWindow : nil
+                if let viewController = rootViewController as? NavigationNotice.ViewController, viewController.noticeView.frame.contains(point) {
+                    return superview
+                } else {
+                    return nil
+                }
             }
         }
         
