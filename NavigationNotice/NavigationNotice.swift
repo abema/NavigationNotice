@@ -365,10 +365,12 @@ open class NavigationNotice {
                     noticeView.frame.origin = CGPoint(x: 0, y: safeAreaInsets.top + topInset)
                     contentView.frame.origin = CGPoint(x: (safeAreaInsets.right + safeAreaInsets.left) / 2,
                                                        y: -contentHeight + topInset)
+                    noticeView.contentInset.top = contentHeight
                 case .bottom:
                     noticeView.frame.origin = CGPoint(x: 0, y: self.view.bounds.height - contentHeight - safeAreaInsets.bottom - bottomInset)
                     contentView.frame.origin = CGPoint(x: (safeAreaInsets.right + safeAreaInsets.left) / 2,
                                                        y: contentHeight)
+                    noticeView.contentInset.bottom = contentHeight
                 }
 
                 if needsUpdateOffset {
