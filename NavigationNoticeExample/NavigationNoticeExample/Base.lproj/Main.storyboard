@@ -36,16 +36,16 @@
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Z2q-YL-Aet">
-                                <rect key="frame" x="100" y="145" width="38" height="30"/>
-                                <state key="normal" title="Show">
+                                <rect key="frame" x="50" y="145" width="30" height="30"/>
+                                <state key="normal" title="Top">
                                     <color key="titleShadowColor" red="0.5" green="0.5" blue="0.5" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 </state>
                                 <connections>
-                                    <action selector="showButtonWasTapped:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="Jay-7z-3Ka"/>
+                                    <action selector="topButtonWasTapped:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="EOS-CP-1mM"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="RWQ-hp-THz">
-                                <rect key="frame" x="282" y="145" width="32" height="30"/>
+                                <rect key="frame" x="332" y="145" width="32" height="30"/>
                                 <state key="normal" title="Hide">
                                     <color key="titleShadowColor" red="0.5" green="0.5" blue="0.5" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 </state>
@@ -53,14 +53,26 @@
                                     <action selector="hideBUttonWasTapped:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="3xY-3p-vu0"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="5D9-gl-2OJ" userLabel="ShowBottom">
+                                <rect key="frame" x="181.5" y="145" width="51" height="30"/>
+                                <state key="normal" title="Bottom">
+                                    <color key="titleShadowColor" red="0.5" green="0.5" blue="0.5" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                </state>
+                                <connections>
+                                    <action selector="bottomButtonWasTapped:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="uiC-gT-2pY"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
+                            <constraint firstItem="5D9-gl-2OJ" firstAttribute="centerY" secondItem="Z2q-YL-Aet" secondAttribute="centerY" id="Lc4-hO-f8v"/>
                             <constraint firstItem="RWQ-hp-THz" firstAttribute="top" secondItem="jyV-Pf-zRb" secondAttribute="bottom" constant="57" id="Prl-gF-yQ6"/>
-                            <constraint firstItem="Z2q-YL-Aet" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leading" constant="100" id="Zqa-Ra-pCZ"/>
-                            <constraint firstAttribute="trailing" secondItem="RWQ-hp-THz" secondAttribute="trailing" constant="100" id="mcM-72-vwf"/>
-                            <constraint firstItem="RWQ-hp-THz" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="Z2q-YL-Aet" secondAttribute="trailing" constant="8" symbolic="YES" id="vhV-qA-8cI"/>
+                            <constraint firstItem="Z2q-YL-Aet" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leading" constant="50" id="Zqa-Ra-pCZ"/>
+                            <constraint firstItem="5D9-gl-2OJ" firstAttribute="centerX" secondItem="kh9-bI-dsS" secondAttribute="centerX" id="hYR-If-DRf"/>
+                            <constraint firstAttribute="trailing" secondItem="RWQ-hp-THz" secondAttribute="trailing" constant="50" id="mcM-72-vwf"/>
                             <constraint firstItem="Z2q-YL-Aet" firstAttribute="top" secondItem="jyV-Pf-zRb" secondAttribute="bottom" constant="57" id="wuU-Xh-uYX"/>
+                            <constraint firstItem="RWQ-hp-THz" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="5D9-gl-2OJ" secondAttribute="trailing" constant="8" symbolic="YES" id="x32-1n-AVF"/>
+                            <constraint firstItem="5D9-gl-2OJ" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="Z2q-YL-Aet" secondAttribute="trailing" constant="8" symbolic="YES" id="zEl-vT-EBx"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="TCw-sp-mre"/>

@@ -362,15 +362,18 @@ open class NavigationNotice {
                 noticeView.contentSize = noticeView.bounds.size
                 switch position {
                 case .top:
-                    noticeView.frame.origin = CGPoint(x: 0, y: safeAreaInsets.top + topInset)
-                    contentView.frame.origin = CGPoint(x: (safeAreaInsets.right + safeAreaInsets.left) / 2,
-                                                       y: -contentHeight + topInset)
+                    noticeView.frame.size.height += (safeAreaInsets.top + topInset)
                     noticeView.contentInset.top = contentHeight
+                    noticeView.contentInset.bottom = (safeAreaInsets.top + topInset)
+                    noticeView.frame.origin = .zero
+                    contentView.frame.origin = CGPoint(x: (safeAreaInsets.right + safeAreaInsets.left) / 2,
+                                                       y: -contentHeight + safeAreaInsets.top + topInset)
                 case .bottom:
-                    noticeView.frame.origin = CGPoint(x: 0, y: self.view.bounds.height - contentHeight - safeAreaInsets.bottom - bottomInset)
+                    noticeView.frame.size.height += (safeAreaInsets.bottom + bottomInset)
+                    noticeView.contentInset.bottom = contentHeight + (safeAreaInsets.bottom + bottomInset)
+                    noticeView.frame.origin = CGPoint(x: 0, y: self.view.bounds.height - contentHeight)
                     contentView.frame.origin = CGPoint(x: (safeAreaInsets.right + safeAreaInsets.left) / 2,
                                                        y: contentHeight)
-                    noticeView.contentInset.bottom = contentHeight
                 }
 
                 if needsUpdateOffset {
