@@ -60,15 +60,18 @@ class ViewController: UIViewController {
         }
     }
 
-    @IBAction func showButtonWasTapped(_ sender: UIButton) {
+    @IBAction func topButtonWasTapped(_ sender: UIButton) {
         let content = self.contentView("Create your content.")
         content.frame.size.height = 50
         content.backgroundColor = UIColor.black.withAlphaComponent(0.9)
-        if Bool.random() {
-            NavigationNotice.onStatusBar(false).addContent(content).showOn(self.view).position(.top).topInset(30).hide(5)
-        } else {
-            NavigationNotice.onStatusBar(false).addContent(content).showOn(self.view).position(.bottom).bottomInset(30).hide(5)
-        }
+        NavigationNotice.onStatusBar(false).addContent(content).showOn(self.view).position(.top).topInset(30).hide(5)
+    }
+
+    @IBAction func bottomButtonWasTapped(_ sender: UIButton) {
+        let content = self.contentView("Create your content.")
+        content.frame.size.height = 50
+        content.backgroundColor = UIColor.black.withAlphaComponent(0.9)
+        NavigationNotice.onStatusBar(false).addContent(content).showOn(self.view).position(.bottom).bottomInset(30).hide(5)
     }
 
     @IBAction func hideBUttonWasTapped(_ sender: UIButton) {
