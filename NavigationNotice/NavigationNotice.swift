@@ -362,16 +362,20 @@ open class NavigationNotice {
                 noticeView.contentSize = noticeView.bounds.size
                 switch position {
                 case .top:
-                    noticeView.frame.size.height += (safeAreaInsets.top + topInset)
-                    noticeView.contentInset.top = contentHeight
-                    noticeView.contentInset.bottom = (safeAreaInsets.top + topInset)
-                    noticeView.frame.origin = .zero
+                    noticeView.contentInset = UIEdgeInsets(top: contentHeight,
+                                                           left: 0.0,
+                                                           bottom: contentHeight + safeAreaInsets.top + topInset,
+                                                           right: 0.0);
+                    noticeView.frame.origin = CGPoint(x: 0, y: safeAreaInsets.top + topInset)
                     contentView.frame.origin = CGPoint(x: (safeAreaInsets.right + safeAreaInsets.left) / 2,
-                                                       y: -contentHeight + safeAreaInsets.top + topInset)
+                                                       y: -contentHeight)
                 case .bottom:
-                    noticeView.frame.size.height += (safeAreaInsets.bottom + bottomInset)
-                    noticeView.contentInset.bottom = contentHeight + (safeAreaInsets.bottom + bottomInset)
-                    noticeView.frame.origin = CGPoint(x: 0, y: self.view.bounds.height - contentHeight)
+                    noticeView.contentInset = UIEdgeInsets(top: contentHeight + safeAreaInsets.bottom + bottomInset,
+                                                           left: 0.0,
+                                                           bottom: contentHeight,
+                                                           right: 0.0);
+                    noticeView.frame.origin = CGPoint(x: 0, y: self.view.bounds.height - contentHeight -
+                                                      safeAreaInsets.bottom - bottomInset)
                     contentView.frame.origin = CGPoint(x: (safeAreaInsets.right + safeAreaInsets.left) / 2,
                                                        y: contentHeight)
                 }
