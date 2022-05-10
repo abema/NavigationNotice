@@ -307,7 +307,7 @@ open class NavigationNotice {
             }
         }
 
-        func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        func scrollViewWillBeginDecelerating(_ scrollView: UIScrollView) {
             let needsHideAnimation = (position == .top && contentOffsetY < 0) || (position == .bottom && contentOffsetY >= contentHeight)
             if needsHideAnimation {
                 resetTimerIfNeeded()
