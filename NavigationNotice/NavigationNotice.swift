@@ -133,7 +133,6 @@ open class NavigationNotice {
 
             noticeView.clipsToBounds = false
             noticeView.showsVerticalScrollIndicator = false
-            noticeView.isPagingEnabled = true
             noticeView.bounces = false
             noticeView.delegate = self
             switch position {
@@ -221,15 +220,7 @@ open class NavigationNotice {
                 contentOffsetY = -(safeAreaInsets.bottom + bottomInset)
             }
 
-            showContent({
-                switch self.position {
-                case .top:
-                    self.contentOffsetY = -self.contentHeight
-                case .bottom:
-                    self.contentOffsetY = self.contentHeight
-                }
-                self.setNeedsStatusBarAppearanceUpdateIfNeeded()
-            }) { _ in
+            scrollToOrigin {
                 completion()
             }
         }
@@ -240,18 +231,7 @@ open class NavigationNotice {
             autoHidden = false
 
             if animated == true {
-                hideContent({
-                    switch self.position {
-                    case .top:
-                        self.contentOffsetY = self.safeAreaInsets.top + self.topInset
-                    case .bottom:
-                        self.contentOffsetY = -(self.safeAreaInsets.bottom + self.bottomInset)
-                    }
-                    self.setNeedsStatusBarAppearanceUpdateIfNeeded()
-                }) { _ in
-                    self.removeContent()
-                    self.hideCompletionHandler?()
-                }
+                scrollToRemove()
             } else {
                 self.setNeedsStatusBarAppearanceUpdateIfNeeded()
                 removeContent()
@@ -317,8 +297,54 @@ open class NavigationNotice {
         }
 
         func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-            if autoHidden == true && decelerate == false && hiddenTimer == nil {
-                timer(hiddenTimeInterval)
+            let isScrollToOrigin: Bool = {
+                switch position {
+                case .top:
+                    return contentOffsetY < topInset + safeAreaInsets.top - contentHeight * 0.75
+                case .bottom:
+                    return contentOffsetY > contentHeight * 0.75 - bottomInset - safeAreaInsets.bottom
+                }
+            }()
+
+            if isScrollToOrigin {
+                if autoHidden == true && decelerate == false {
+                    scrollToOrigin {
+                        if self.hiddenTimer == nil {
+                            self.timer(self.hiddenTimeInterval)
+                        }
+                    }
+                }
+            } else {
+                scrollToRemove()
+            }
+        }
+
+        func scrollToOrigin(completion: @escaping () -> Void) {
+            showContent({
+                switch self.position {
+                case .top:
+                    self.contentOffsetY = -self.contentHeight
+                case .bottom:
+                    self.contentOffsetY = self.contentHeight
+                }
+                self.setNeedsStatusBarAppearanceUpdateIfNeeded()
+            }) { _ in
+                completion()
+            }
+        }
+
+        func scrollToRemove() {
+            hideContent({
+                switch self.position {
+                case .top:
+                    self.contentOffsetY = self.safeAreaInsets.top + self.topInset
+                case .bottom:
+                    self.contentOffsetY = -(self.safeAreaInsets.bottom + self.bottomInset)
+                }
+                self.setNeedsStatusBarAppearanceUpdateIfNeeded()
+            }) { _ in
+                self.removeContent()
+                self.hideCompletionHandler?()
             }
         }
 
@@ -362,16 +388,20 @@ open class NavigationNotice {
                 noticeView.contentSize = noticeView.bounds.size
                 switch position {
                 case .top:
-                    noticeView.frame.size.height += (safeAreaInsets.top + topInset)
-                    noticeView.contentInset.top = contentHeight
-                    noticeView.contentInset.bottom = (safeAreaInsets.top + topInset)
-                    noticeView.frame.origin = .zero
+                    noticeView.contentInset = UIEdgeInsets(top: contentHeight,
+                                                           left: 0.0,
+                                                           bottom: contentHeight + safeAreaInsets.top + topInset,
+                                                           right: 0.0);
+                    noticeView.frame.origin = CGPoint(x: 0, y: safeAreaInsets.top + topInset)
                     contentView.frame.origin = CGPoint(x: (safeAreaInsets.right + safeAreaInsets.left) / 2,
-                                                       y: -contentHeight + safeAreaInsets.top + topInset)
+                                                       y: -contentHeight)
                 case .bottom:
-                    noticeView.frame.size.height += (safeAreaInsets.bottom + bottomInset)
-                    noticeView.contentInset.bottom = contentHeight + (safeAreaInsets.bottom + bottomInset)
-                    noticeView.frame.origin = CGPoint(x: 0, y: self.view.bounds.height - contentHeight)
+                    noticeView.contentInset = UIEdgeInsets(top: contentHeight + safeAreaInsets.bottom + bottomInset,
+                                                           left: 0.0,
+                                                           bottom: contentHeight,
+                                                           right: 0.0);
+                    noticeView.frame.origin = CGPoint(x: 0, y: self.view.bounds.height - contentHeight -
+                                                      safeAreaInsets.bottom - bottomInset)
                     contentView.frame.origin = CGPoint(x: (safeAreaInsets.right + safeAreaInsets.left) / 2,
                                                        y: contentHeight)
                 }
@@ -423,7 +453,7 @@ open class NavigationNotice {
             showingNotice?.noticeViewController.setNeedsStatusBarAppearanceUpdateIfNeeded()
             showingNotice = nil
 
-            mainWindow?.makeKeyAndVisible()
+            mainWindow?.makeKey()
             noticeWindow = nil
         }
 
