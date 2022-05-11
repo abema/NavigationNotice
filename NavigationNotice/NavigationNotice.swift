@@ -453,7 +453,7 @@ open class NavigationNotice {
             showingNotice?.noticeViewController.setNeedsStatusBarAppearanceUpdateIfNeeded()
             showingNotice = nil
 
-            mainWindow?.makeKeyAndVisible()
+            mainWindow?.makeKey()
             noticeWindow = nil
         }
 
