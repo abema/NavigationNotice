@@ -68,18 +68,14 @@ class ViewController: UIViewController {
         }
     }
 
-<<<<<<< HEAD
-    @IBAction func topButtonWasTapped(_ sender: UIButton) {
-=======
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         if #available(iOS 11.0, *) {
             topSafeAreaHeight = self.view.safeAreaInsets.top
         }
     }
-    
-    @IBAction func showButtonWasTapped(_ sender: UIButton) {
->>>>>>> upstream/master
+
+    @IBAction func topButtonWasTapped(_ sender: UIButton) {
         let content = self.contentView("Create your content.")
         content.frame.size.height = 50
         content.backgroundColor = UIColor.black.withAlphaComponent(0.9)
