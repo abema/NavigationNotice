@@ -105,11 +105,19 @@ open class NavigationNotice {
             return childController?.preferredInterfaceOrientationForPresentation
                 ?? super.preferredInterfaceOrientationForPresentation
         }
+<<<<<<< HEAD
 
         override var childForStatusBarStyle : UIViewController? {
             return childController
         }
 
+=======
+        
+        override var childForStatusBarStyle : UIViewController? {
+            return childController
+        }
+        
+>>>>>>> upstream/master
         override var childForStatusBarHidden : UIViewController? {
             return childController
         }
@@ -244,9 +252,15 @@ open class NavigationNotice {
                 hide(animated)
             }
         }
+<<<<<<< HEAD
 
         @objc func panGestureAction(_ gesture: UIPanGestureRecognizer) {
             if (position == .top && contentOffsetY >= 0) || position == .bottom && contentOffsetY < 0 {
+=======
+        
+        @objc func panGestureAction(_ gesture: UIPanGestureRecognizer) {
+            if contentOffsetY >= 0 {
+>>>>>>> upstream/master
                 hide(false)
                 return
             }
@@ -441,11 +455,17 @@ open class NavigationNotice {
 
             noticeWindow?.rootViewController = notice.noticeViewController
             noticeWindow?.windowLevel = UIWindow.Level.statusBar + (notice.onStatusBar ? 1 : -1)
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> upstream/master
             if let view = notice.noticeViewController.targetView {
                 mainWindow = view.window
 
                 notice.noticeViewController.showOn(view)
+            } else {
+                self.next()
             }
         }
 
@@ -456,7 +476,20 @@ open class NavigationNotice {
             mainWindow?.makeKey()
             noticeWindow = nil
         }
+<<<<<<< HEAD
 
+=======
+        
+        fileprivate func generateWindow() -> HitWindow {
+            if #available(iOS 13.0, *),
+               let windowScene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene {
+                return HitWindow(windowScene: windowScene)
+            } else {
+                return HitWindow(frame: UIScreen.main.bounds)
+            }
+        }
+        
+>>>>>>> upstream/master
         func next() {
             if let notice = pop() {
                 startNotice(notice)
@@ -470,7 +503,7 @@ open class NavigationNotice {
 
             DispatchQueue.main.async {
                 if self.showingNotice == nil {
-                    self.noticeWindow = HitWindow(frame: UIScreen.main.bounds)
+                    self.noticeWindow = self.generateWindow()
                     self.noticeWindow?.makeKeyAndVisible()
 
                     self.next()
